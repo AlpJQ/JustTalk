@@ -84,8 +84,8 @@
         </filter>
     </appender>
 
-    <!--表示记录哪一个包，community包下的日志级别是debug-->
-    <logger name="com.nowcoder.community" level="debug"/>
+    <!--表示记录哪一个包，communityy包下的日志级别是debug-->
+    <logger name="com.nowcoder.communityy" level="debug"/>
 
     <root level="info">
         <!--启用哪一个日志-->
