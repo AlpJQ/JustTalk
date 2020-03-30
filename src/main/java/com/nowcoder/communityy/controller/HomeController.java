@@ -26,9 +26,9 @@ public class HomeController {
     private DiscussPostService discussPostService;
 
     /*
-    list是从数据库中拿到的帖子详细信息
-    map集合存放帖子和楼主
-    discussPosts(List类型)集合存放所有的map（帖子和楼主）
+        list是从数据库中拿到的帖子详细信息
+        map集合存放帖子和楼主
+        discussPosts(List类型)集合存放所有的map（帖子和楼主）
      */
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page) {
@@ -50,5 +50,10 @@ public class HomeController {
         }
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
+    }
+
+    @RequestMapping(path = "/error", method = RequestMethod.GET)
+    public String getErrorPage() {
+        return "/error/500";
     }
 }

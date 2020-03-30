@@ -20,4 +20,7 @@ public interface DiscussPostMapper {
     int insertDiscussPost(DiscussPost discussPost);
 
     DiscussPost selectDiscussPostById(int id);
+
+    // 随着新增评论的实现，相应的discuss_post表中的comment_count字段值要+1
+    int updateCommentCount(int id, int commentCount);
 }

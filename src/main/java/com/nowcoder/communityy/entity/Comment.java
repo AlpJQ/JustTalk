@@ -2,17 +2,16 @@ package com.nowcoder.communityy.entity;
 
 import java.util.Date;
 
-public class DiscussPost {
+public class Comment {
 
     private int id;
     private int userId;
-    private String title;
+    private int entityType;
+    private int entityId;
+    private int targetId;
     private String content;
-    private int type;
     private int status;
     private Date createTime;
-    private int commentCount;
-    private double score;
 
     public int getId() {
         return id;
@@ -30,12 +29,28 @@ public class DiscussPost {
         this.userId = userId;
     }
 
-    public String getTitle() {
-        return title;
+    public int getEntityType() {
+        return entityType;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setEntityType(int entityType) {
+        this.entityType = entityType;
+    }
+
+    public int getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+
+    public int getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(int targetId) {
+        this.targetId = targetId;
     }
 
     public String getContent() {
@@ -44,14 +59,6 @@ public class DiscussPost {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     public int getStatus() {
@@ -70,34 +77,17 @@ public class DiscussPost {
         this.createTime = createTime;
     }
 
-    public int getCommentCount() {
-        return commentCount;
-    }
-
-    public void setCommentCount(int commentCount) {
-        this.commentCount = commentCount;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
     @Override
     public String toString() {
-        return "DiscussPost{" +
+        return "Comment{" +
                 "id=" + id +
                 ", userId=" + userId +
-                ", title='" + title + '\'' +
+                ", entityType=" + entityType +
+                ", entityId=" + entityId +
+                ", targetId=" + targetId +
                 ", content='" + content + '\'' +
-                ", type=" + type +
                 ", status=" + status +
                 ", createTime=" + createTime +
-                ", commentCount=" + commentCount +
-                ", score=" + score +
                 '}';
     }
 }
