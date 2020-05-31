@@ -3,8 +3,6 @@ package com.nowcoder.communityy.service;
 import com.nowcoder.communityy.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
@@ -21,23 +19,23 @@ public class LikeService {
     public void like(int userId, int entityType, int entityId, int entityUserId) {
         redisTemplate.execute(new SessionCallback() {
             @Override
-            public Object execute(RedisOperations redisOperations) throws DataAccessException {
+            public Object execute(RedisOperations operations) throws DataAccessException {
                 String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
                 String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
 
-                boolean isMember = redisOperations.opsForSet().isMember(entityId, userId);
+                boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);
 
-                redisOperations.multi();
+                operations.multi();
 
-                if(isMember) {
-                    redisOperations.opsForSet().remove(entityLikeKey,userId);
-                    redisOperations.opsForValue().decrement(userLikeKey);
+                if (isMember) {
+                    operations.opsForSet().remove(entityLikeKey, userId);
+                    operations.opsForValue().decrement(userLikeKey);
                 } else {
-                    redisOperations.opsForSet().add(entityLikeKey, userId);
-                    redisOperations.opsForValue().increment(userLikeKey);
+                    operations.opsForSet().add(entityLikeKey, userId);
+                    operations.opsForValue().increment(userLikeKey);
                 }
 
-                return redisOperations.exec();
+                return operations.exec();
             }
         });
     }
@@ -57,6 +55,12 @@ public class LikeService {
     }
 
     // 查询某个用户获得的赞
-    public int findUserLikeCount(int )
+    public int findUserLikeCount(int userId) {
+        String userLikeKey = RedisKeyUtil.getUserLikeKey(userId);
+        Integer count = (Integer) redisTemplate.opsForValue().get(userLikeKey);
+        return count == null ? 0 : count.intValue();
+    }
+
+
 }
 
