@@ -15,15 +15,18 @@ public class CommunityUtil {
         return UUID.randomUUID().toString();
     }
 
-    //MD5加密
-    //hello -> ahsjdhlkl12
-    //hello + sf452 -> ahsjdhlkl12sf452
+    /*MD5加密，特点：相同字符串加密后的结果是相同的
+        把字符串hello加密成ahsjdhlkl12，黑客有简单密码库，可以轻易破解，所以要加点措施
+        user表中有一个salt字段，可以在字符串hello后面加一个随机字符串，比如
+        hello + sf452 -> ahsjdhlkl12sf452
+        这样子就不会被轻易破解了。下面参数key就是密码加salt之后的值
+    */
     public static String md5(String key) {
         //使用org.apache.commons.lang3.StringUtils的类对象判别key,key为空和空字符串都为blank，比较方便
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        //使用spring自带的工具DigestUtils将key经过md5加密
+        //使用spring自带的工具DigestUtils将key经过md5加密成16进制的字符串
         return DigestUtils.md5DigestAsHex(key.getBytes());
     }
 

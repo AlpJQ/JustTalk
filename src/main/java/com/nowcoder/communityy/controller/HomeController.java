@@ -45,7 +45,7 @@ public class HomeController implements CommunityConstant {
         List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), page.getLimit());
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if(list != null) {
-            for (DiscussPost post : list) {
+            for (DiscussPost post : list) {//遍历每一个帖子
                 Map<String, Object> map = new HashMap<>();
                 map.put("post", post);
                 User user = userService.findUserById(post.getUserId());
