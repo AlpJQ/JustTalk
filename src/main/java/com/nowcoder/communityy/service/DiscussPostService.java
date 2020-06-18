@@ -26,12 +26,13 @@ public class DiscussPostService {
         return discussPostMapper.selectDiscussPostRows(userId);
     }
 
+    // 发布帖子
     public int addDiscussPost(DiscussPost post) {
         if (post == null) {
             throw new IllegalArgumentException("参数不能为空!");
         }
 
-        // 转义HTML标记，比如<script>中的< 可以转义
+        // 转义HTML标记，比如<script>中的< 可以进行转义。HtmlUtils是SpringMVC自带的工具类
         post.setTitle(HtmlUtils.htmlEscape(post.getTitle()));
         post.setContent(HtmlUtils.htmlEscape(post.getContent()));
         // 过滤敏感词

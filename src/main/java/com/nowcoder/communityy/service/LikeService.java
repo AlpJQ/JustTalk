@@ -25,6 +25,7 @@ public class LikeService {
 
                 boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);
 
+                // 开启事务
                 operations.multi();
 
                 if (isMember) {
@@ -35,6 +36,7 @@ public class LikeService {
                     operations.opsForValue().increment(userLikeKey);
                 }
 
+                // 提交事务
                 return operations.exec();
             }
         });
@@ -48,7 +50,7 @@ public class LikeService {
 
     // 查询某人对某实体的点赞状态
     // 【注意】这里返回值是1或0，而不是直接返回布尔值，这是因为以后可能考虑到“点踩”
-    // 等业务的扩展需求，可以区分多种不同的新式
+    // 等业务的扩展需求，返回不同的值表示不同的状态，可以区分多种不同的样式，可扩展性更强
     public int findEntityLikeStatus(int userId, int entityType, int entityId) {
         String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
         return redisTemplate.opsForSet().isMember(entityLikeKey, userId) ? 1 : 0;
@@ -60,7 +62,5 @@ public class LikeService {
         Integer count = (Integer) redisTemplate.opsForValue().get(userLikeKey);
         return count == null ? 0 : count.intValue();
     }
-
-
 }
 

@@ -31,7 +31,7 @@ public class CommunityUtil {
     }
 
     /**
-     * 得到浏览器传过来的json数据
+     * 将服务器返回给浏览器的数据转换为JSON格式的字符串
      *
      * @param code 编码
      * @param msg  提示信息

@@ -62,7 +62,7 @@ public class MessageController {
         }
         model.addAttribute("conversations", conversations);
 
-        // 查询未读消息数量
+        // 查询未读消息数量（查询用户所有的未读，不是单独两个人之间私信的未读）
         int letterUnreadCount = messageService.findLetterUnreadCount(user.getId(), null);
         model.addAttribute("letterUnreadCount", letterUnreadCount);
 
@@ -84,6 +84,7 @@ public class MessageController {
         List<Message> letterList = messageService.findLetters(conversationId, page.getOffset(), page.getLimit());
         List<Map<String, Object>> letters = new ArrayList<>();
         if (letterList != null) {
+            //遍历两个人之间的每条消息
             for (Message message : letterList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("letter", message);

@@ -26,9 +26,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         /*
-        excludePathPatterns静态资源访问服务器不用拦截，因为静态资源
-        没有什么业务逻辑，只有那些跳转处理了业务的资源才要拦截。
-        addPathPatterns添加要拦截的路径，这里拦截的是注册和登录
+            excludePathPatterns静态资源访问服务器不用拦截，因为静态资源
+            没有什么业务逻辑，只有那些跳转处理了业务的资源才要拦截。
+            addPathPatterns添加要拦截的路径，这里拦截的是注册和登录
          */
         registry.addInterceptor(alphaInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg")

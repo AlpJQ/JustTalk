@@ -2,6 +2,7 @@ $(function(){
 	$("#publishBtn").click(publish);
 });
 
+
 function publish() {
 	$("#publishModal").modal("hide");
 

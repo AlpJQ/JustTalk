@@ -4,11 +4,14 @@ import com.google.code.kaptcha.Producer;
 import com.nowcoder.communityy.entity.User;
 import com.nowcoder.communityy.service.UserService;
 import com.nowcoder.communityy.util.CommunityConstant;
+import com.nowcoder.communityy.util.CommunityUtil;
+import com.nowcoder.communityy.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -24,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class LoginController implements CommunityConstant {
@@ -38,6 +42,9 @@ public class LoginController implements CommunityConstant {
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/register", method = RequestMethod.GET)
     public String getRegisterPage() {
@@ -54,7 +61,7 @@ public class LoginController implements CommunityConstant {
      */
     @RequestMapping(path = "/register", method = RequestMethod.POST)
     public String register(Model model, User user) {
-        Map<String, Object> map = userService.register(user);
+        Map<String, Object> map = userService.register(user);//跟据返回的map，判断处理过程，注册成功的话map返回值为null
         // 注册成功
         if (map == null || map.isEmpty()) {
             model.addAttribute("msg", "注册成功,我们已经向您的邮箱发送了一封激活邮件,请尽快激活!");
@@ -69,9 +76,11 @@ public class LoginController implements CommunityConstant {
     }
 
     /*
-    前后端交互：处理用户点击激活连接，验证激活成功与否
+        前后端交互：处理用户点击激活连接，验证激活成功与否
      */
     // 这个是注册成功的时候，发给用户的连接-> http://localhost:8080/community/activation/101/code
+    // 点击激活链接之后在这里被拦截，不是表单提交，相当于一个查询行为，所以不用POST请求，直接GET就好
+    // @PathVariable的作用是从路径中取值
     @RequestMapping(path = "/activation/{userId}/{code}", method = RequestMethod.GET)
     public String activation(Model model, @PathVariable("userId") int userId, @PathVariable("code") String code) {
         int result = userService.activation(userId, code);
@@ -88,24 +97,31 @@ public class LoginController implements CommunityConstant {
         return "/site/operate-result";
     }
 
+
     /**
      * 生成验证码
      */
     @RequestMapping(path = "/kaptcha", method = RequestMethod.GET)
-    public void getKaptcha(HttpServletResponse response, HttpSession session) {
-        //生成验证码
+    public void getKaptcha(HttpServletResponse response/*, HttpSession session*/) {
+        // 生成验证码
         String text = kaptchaProducer.createText();
         BufferedImage image = kaptchaProducer.createImage(text);
 
-        //将验证码存入session
-        session.setAttribute("kaptcha", text);
+        // 将验证码存入session
+        // session.setAttribute("kaptcha", text);
 
-        //设置响应头类型-》图片格式
+        // 验证码的归属
+        String kaptchaOwner = CommunityUtil.generateUUID();
+        Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(contextPath);
+        response.addCookie(cookie);
+        // 将验证码存入Redis
+        String redisKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+        redisTemplate.opsForValue().set(redisKey, text, 60, TimeUnit.SECONDS);
+
+        // 将此图片输出给浏览器
         response.setContentType("image/png");
-        /*
-        从response从获取图片的输出流，显示到浏览器上面
-        ImageIO是一个向浏览器输出图片的工具
-         */
         try {
             OutputStream os = response.getOutputStream();
             ImageIO.write(image, "png", os);
@@ -116,16 +132,22 @@ public class LoginController implements CommunityConstant {
 
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     public String login(String username, String password, String code, boolean rememberme,
-                        Model model, HttpSession session, HttpServletResponse response) {
+                        Model model, /*HttpSession session, */HttpServletResponse response,
+                        @CookieValue("kaptchaOwner") String kaptchaOwner) {
         // 检查验证码
-        String kaptcha = (String) session.getAttribute("kaptcha");
+        // String kaptcha = (String) session.getAttribute("kaptcha");
+        String kaptcha = null;
+        if (StringUtils.isNotBlank(kaptchaOwner)) {
+            String redisKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
+            kaptcha = (String) redisTemplate.opsForValue().get(redisKey);
+        }
+
         if (StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)) {
             model.addAttribute("codeMsg", "验证码不正确!");
             return "/site/login";
         }
 
         // 检查账号,密码
-        // 勾选记住我，那么存放在session的时间就更长。下面两个字符串是两个常量，在CommunityConstant中定义
         int expiredSeconds = rememberme ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
         Map<String, Object> map = userService.login(username, password, expiredSeconds);
         if (map.containsKey("ticket")) {
@@ -141,7 +163,7 @@ public class LoginController implements CommunityConstant {
         }
     }
 
-    //拦截浏览器cookie中的ticket属性，使用了注解CookieValue
+    // 拦截浏览器cookie中的ticket属性，使用了注解CookieValue
     @RequestMapping(path = "/logout", method = RequestMethod.GET)
     public String logout(@CookieValue("ticket") String ticket) {
         userService.logout(ticket);

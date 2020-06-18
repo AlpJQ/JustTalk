@@ -46,7 +46,7 @@ public class UserController implements CommunityConstant {
     private UserService userService;
 
     @Autowired
-    private HostHolder hostHolder;//用户信息线程安全的类
+    private HostHolder hostHolder; // 当前用户
 
     @Autowired
     private LikeService likeService;
@@ -54,24 +54,24 @@ public class UserController implements CommunityConstant {
     @Autowired
     private FollowService followService;
 
-    //响应前端点击“个人设置”的请求，转发到setting.html
+    // 响应前端点击“个人设置”的请求，转发到setting.html
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
-    //上传头像
+    // 上传头像
     @LoginRequired
-    @RequestMapping(path = "upload", method = RequestMethod.POST)
+    @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
-        //文件为空，则提示错误
+        // 文件为空，则提示错误
         if (headerImage == null) {
             model.addAttribute("error", "您还没有选择图片！");
             return "/site/setting";
         }
 
-        //1.获取文件原名称
+        //1.获取文件原名称，不包括后缀
         String fileName = headerImage.getOriginalFilename();
         //得到文件名称.之后的字符串，即获取文件后缀名
         String suffix = fileName.substring(fileName.lastIndexOf("."));
@@ -81,7 +81,7 @@ public class UserController implements CommunityConstant {
         }
 
         //2.上传文件
-        //生成随机文件名
+        // 生成随机文件名
         fileName = CommunityUtil.generateUUID() + suffix;
         // 确定文件存放的路径，new出来之后还是一个空文件
         File dest = new File(uploadPath + "/" + fileName);
@@ -93,7 +93,7 @@ public class UserController implements CommunityConstant {
             throw new RuntimeException("上传文件失败,服务器发生异常!", e);
         }
 
-        //3.更新前端头像显示
+        // 3.更新前端头像显示
         // 更新当前用户的头像的路径(web访问路径)
         // http://localhost:8080/community/user/header/xxx.png
         User user = hostHolder.getUser();

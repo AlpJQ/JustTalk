@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 /*
     处理异常的类
  */
-// annotations = Controller.class表示只会处理标有controller注解的类
+// annotations = Controller.class表示只会处理标有controller注解的bean
 @ControllerAdvice(annotations = Controller.class)
 public class ExceptionAdvice {
 
@@ -34,11 +34,11 @@ public class ExceptionAdvice {
         }
 
         /*
-            判断是异步请求出现异常，还是重定向
+            判断是异步请求出现异常，还是普通请求（重定向）
             需要分开处理
          */
         String xRequestedWith = request.getHeader("x-requested-with");// 固定写法，记住就好了
-        // 异步请求异常
+        // 如果是XMLHttpRequest表示异步请求，要返回JSON数据
         if ("XMLHttpRequest".equals(xRequestedWith)) {
             response.setContentType("application/plain;charset=utf-8");
             PrintWriter writer = response.getWriter();

@@ -23,7 +23,7 @@ public class KaptchaConfig {
         properties.setProperty("kaptcha.textproducer.font.color", "0,0,0");//黑色
         properties.setProperty("kaptcha.textproducer.char.string", "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYAZ");
         properties.setProperty("kaptcha.textproducer.char.length", "4");
-        properties.setProperty("kaptcha.noise.impl", "com.google.code.kaptcha.impl.NoNoise");//做噪声
+        properties.setProperty("kaptcha.noise.impl", "com.google.code.kaptcha.impl.NoNoise");//做噪声，做一些干扰
 
         DefaultKaptcha kaptcha = new DefaultKaptcha();
         Config config = new Config(properties);

@@ -187,7 +187,7 @@ public class AlphaController {
         return "get session";
     }
 
-    // ajax示例
+    // ajax示例，异步请求返回的是字符串
     @RequestMapping(path = "/ajax", method = RequestMethod.POST)
     @ResponseBody
     public String testAJAX(String name, int age) {

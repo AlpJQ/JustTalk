@@ -15,7 +15,7 @@ public interface MessageMapper {
     // 查询当前用户的会话数量.
     int selectConversationCount(int userId);
 
-    // 查询某个会话所包含的私信列表.
+    // 查询某个会话所包含的私信列表，一个会话中有多条私信
     List<Message> selectLetters(String conversationId, int offset, int limit);
 
     // 查询某个会话所包含的私信数量.

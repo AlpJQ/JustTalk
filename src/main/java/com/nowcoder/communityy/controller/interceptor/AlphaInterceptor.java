@@ -14,7 +14,7 @@ public class AlphaInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaInterceptor.class);
 
-    // 在Controller之前执行
+    // 在Controller之前执行，如果返回false，表示程序不会继续执行下去，在这里终止
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         logger.debug("preHandle: " + handler.toString());
@@ -27,7 +27,7 @@ public class AlphaInterceptor implements HandlerInterceptor {
         logger.debug("postHandle: " + handler.toString());
     }
 
-    // 在TemplateEngine之后执行
+    // 在TemplateEngine（模板引擎）之后执行
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         logger.debug("afterCompletion: " + handler.toString());

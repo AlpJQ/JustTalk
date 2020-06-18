@@ -24,6 +24,38 @@ import java.util.Map;
 @Component
 public class SensitiveFilter {
 
+    /**
+     * 前缀树的节点结构
+     */
+    private class TreeNode {
+
+        // 判断是不是一个敏感词的结尾
+        private boolean isKeywordEnd = false;
+
+        // 当前节点的下一个节点(key是下级节点字符，value是下级节点)
+        private Map<Character, TreeNode> subNodes = new HashMap<>();
+
+        // 判断是不是到了一个敏感词的结尾处
+        public boolean isKeywordEnd() {
+            return isKeywordEnd;
+        }
+
+        // 设置一个敏感词的结尾
+        public void setKeywordEnd(boolean keywordEnd) {
+            isKeywordEnd = keywordEnd;
+        }
+
+        // 添加子节点，一个节点代表一个字符
+        public void addSubNode(Character c, TreeNode node) {
+            subNodes.put(c, node);
+        }
+
+        // 获取子节点
+        public TreeNode getSubNode(Character c) {
+            return subNodes.get(c);
+        }
+    }
+
     // 日志类
     private static final Logger logger = LoggerFactory.getLogger(SensitiveFilter.class);
 
@@ -33,18 +65,18 @@ public class SensitiveFilter {
     // 根节点
     private TreeNode rootNode = new TreeNode();
 
-    // 这里的注解含义：当服务启动的时候，也就是调用这个bean容器之后，就会调用被这个注解标识的方法
+    // 这里的注解含义：当服务启动的时候，也就是调用这个bean容器之后，就会调用被这个注解标识的方法，自动执行，构造树形结构。
     // 下面try-catch的写法方便之处：在try里面的操作自动执行，并且会在最后自动close，不用我们手动close
     @PostConstruct
     public void init() {
         try (
                 // 读取存放敏感词的文件
                 InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is))
         ) {
             String keyword;
             while ((keyword = reader.readLine()) != null) {
-                //添加到前缀树，一次添加一个敏感词
+                // 添加到前缀树，一次添加一个敏感词
                 this.addKeyword(keyword);
             }
         } catch (IOException e) {
@@ -55,20 +87,20 @@ public class SensitiveFilter {
     // 把一个敏感词添加到前缀树
     // 比如当前敏感词是abcc，而前缀树中已经有敏感词abms，则我们不用重新创建节点a和b
     public void addKeyword(String keyword) {
-        TreeNode tempNode = rootNode;
+        TreeNode curNode = rootNode;
         for (int i = 0; i < keyword.length(); i++) {
             char c = keyword.charAt(i);
-            TreeNode subNode = tempNode.getSubNode(c);
+            TreeNode subNode = curNode.getSubNode(c);
             if(subNode == null) {
                 //初始化子节点
                 subNode = new TreeNode();
-                tempNode.addSubNode(c, subNode);
+                curNode.addSubNode(c, subNode);
             }
             // 让当前节点指向子节点
-            tempNode = subNode;
+            curNode = subNode;
         }
         // 当这个敏感词读取结束时，就在词尾添加已结束的标识
-        tempNode.setKeywordEnd(true);
+        curNode.setKeywordEnd(true);
     }
 
     /**
@@ -95,7 +127,7 @@ public class SensitiveFilter {
             char c = text.charAt(position);// 获得指针3当前指向的字符
             // 跳过特殊符号
             if (isSymbol((c))){
-                //若指针1处于根节点，则将此符号计入结果，让指针2向下走一步
+                // 若指针1处于根节点，则将此符号计入结果，让指针2向下走一步
                 if(tempNode == rootNode) {
                     sb.append(c);
                     begin++;
@@ -140,35 +172,5 @@ public class SensitiveFilter {
     }
 
 
-    /**
-     * 前缀树结构
-     */
-    private class TreeNode {
 
-        // 判断是不是一个敏感词的结尾
-        private boolean isKeywordEnd = false;
-
-        // 当前节点的下一个节点(key是下级节点字符，value是下级节点)
-        private Map<Character, TreeNode> subNodes = new HashMap<>();
-
-        // 判断是不是到了一个敏感词的结尾处
-        public boolean isKeywordEnd() {
-            return isKeywordEnd;
-        }
-
-        // 设置一个敏感词的结尾
-        public void setKeywordEnd(boolean keywordEnd) {
-            isKeywordEnd = keywordEnd;
-        }
-
-        // 添加子节点，一个节点代表一个字符
-        public void addSubNode(Character c, TreeNode node) {
-            subNodes.put(c, node);
-        }
-
-        // 获取子节点
-        public TreeNode getSubNode(Character c) {
-            return subNodes.get(c);
-        }
-    }
 }

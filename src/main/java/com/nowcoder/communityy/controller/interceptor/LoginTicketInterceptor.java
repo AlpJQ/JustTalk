@@ -24,8 +24,8 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     private HostHolder hostHolder;
 
     /*
-    preHandle是接口定义好的，我们不能随意加参数，要从cookie拿到ticket，不能加cookieValue的注解
-    但是我们可以从request从拿到cookie。我们把从request获取cookie封装为CookieUtil的工具类
+        preHandle是接口定义好的，我们不能随意加参数，要从cookie拿到ticket，不能加cookieValue的注解
+        但是我们可以从request从拿到cookie。我们把从request获取cookie封装为工具类CookieUtil
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -48,7 +48,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     }
 
     /*
-    在模板之前使用user数据
+        在模板之前使用user数据
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
@@ -59,7 +59,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     }
 
     /*
-
+        整个请求结束之后，进行clear
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {

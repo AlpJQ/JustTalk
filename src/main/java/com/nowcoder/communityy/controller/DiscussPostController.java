@@ -47,7 +47,7 @@ public class DiscussPostController implements CommunityConstant {
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(String title, String content) {
-        User user = hostHolder.getUser();
+        User user = hostHolder.getUser(); //获取当前用户
         if (user == null) {
             return CommunityUtil.getJSONString(403, "你还没有登录哦!");
         }
@@ -74,12 +74,11 @@ public class DiscussPostController implements CommunityConstant {
         // 作者
         User user = userService.findUserById(post.getUserId());
         model.addAttribute("user", user);
-        // 点赞
+        // 点赞数量
         long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPostId);
         model.addAttribute("likeCount", likeCount);
         // 点赞状态
-        // 注意这里的第一个参数userId是当前查看帖子的用户，而不是发帖的人，所以是hostHolder.getUser().getId()
-        // 如果用户没登录，也可以看到帖子的点赞数目
+        // 如果当前用户没登录，也可以看到帖子的点赞数目，而且肯定显示没点赞状态
         int likeStatus = hostHolder.getUser() == null ? 0 :
                 likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_POST, discussPostId);
         model.addAttribute("likeStatus", likeStatus);
@@ -92,12 +91,13 @@ public class DiscussPostController implements CommunityConstant {
         // 把从service中拿到的服务器中评论的内容，封装到model中
         // 评论: 给帖子的评论
         // 回复: 给评论的评论
-        // 评论列表
+        // 评论列表，当前帖子的所有评论commentList
         List<Comment> commentList = commentService.findCommentsByEntity(
                 ENTITY_TYPE_POST, post.getId(), page.getOffset(), page.getLimit());
         // 评论VO列表
         List<Map<String, Object>> commentVoList = new ArrayList<>();
         if (commentList != null) {
+            // 每一条评论comment，将每一条comment的所有信息放在map中
             for (Comment comment : commentList) {
                 // 评论VO
                 Map<String, Object> commentVo = new HashMap<>();// 把每一条评论封装到map集合中
