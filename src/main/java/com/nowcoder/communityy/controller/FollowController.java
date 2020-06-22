@@ -1,7 +1,9 @@
 package com.nowcoder.communityy.controller;
 
+import com.nowcoder.communityy.entity.Event;
 import com.nowcoder.communityy.entity.Page;
 import com.nowcoder.communityy.entity.User;
+import com.nowcoder.communityy.event.EventProducer;
 import com.nowcoder.communityy.service.FollowService;
 import com.nowcoder.communityy.service.UserService;
 import com.nowcoder.communityy.util.CommunityConstant;
@@ -30,12 +32,24 @@ public class FollowController implements CommunityConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
     public String follow(int entityType, int entityId) {
         User user = hostHolder.getUser();
 
         followService.follow(user.getId(), entityType, entityId);
+
+        // 触发关注事件，注意这里关注的用户，不用像评论和点赞那样跟帖子有关，需要设置一个postId可供用户查看是哪一个帖子
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJSONString(0, "已关注");
     }

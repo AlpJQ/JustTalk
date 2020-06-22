@@ -31,6 +31,9 @@ public class ServiceLogAspect {
         // RequestContextHolder类的使用，通过它的getRequestAttributes方法拿到属性，再通过
         // attributes.getRequest()拿到request，最后就可以通过request.getRemoteHost()拿到IP地址了
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if(attributes == null) {
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         String ip = request.getRemoteHost();// 得到访问用户的IP地址
 
