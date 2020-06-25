@@ -1,10 +1,8 @@
 package com.nowcoder.communityy.controller;
 
 
-import com.nowcoder.communityy.entity.Comment;
-import com.nowcoder.communityy.entity.DiscussPost;
-import com.nowcoder.communityy.entity.Page;
-import com.nowcoder.communityy.entity.User;
+import com.nowcoder.communityy.entity.*;
+import com.nowcoder.communityy.event.EventProducer;
 import com.nowcoder.communityy.service.CommentService;
 import com.nowcoder.communityy.service.DiscussPostService;
 import com.nowcoder.communityy.service.LikeService;
@@ -41,6 +39,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     /*
         发布帖子
      */
@@ -58,6 +59,14 @@ public class DiscussPostController implements CommunityConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        // 触发发帖事件
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
 
         // 报错的情况,将来统一处理.
         return CommunityUtil.getJSONString(0, "发布成功!");
