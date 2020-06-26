@@ -56,7 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Comm
                         AUTHORITY_MODERATOR
                 )
                 .antMatchers(
-                        "/discuss/delete"
+                        "/discuss/delete",
+                        "/data/**"
                 )
                 .hasAnyAuthority(
                         AUTHORITY_ADMIN
@@ -64,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Comm
                 .anyRequest().permitAll()
                 .and().csrf().disable();
 
-        // 权限不够时的处理
+        // 权限不够时的处理zhi
         http.exceptionHandling()
                 .authenticationEntryPoint(new AuthenticationEntryPoint() {
                     // 没有登录
